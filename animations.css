@@ -1,0 +1,259 @@
+/* ==================================
+   MEDICARE — WINE & CREAM ANIMATIONS
+================================== */
+
+/* Smooth page entrance */
+body {
+    animation: pageEnter 0.65s ease-out both;
+}
+
+@keyframes pageEnter {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Buttons */
+button,
+.login-button {
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease,
+        background-color 0.25s ease;
+}
+
+button:hover,
+.login-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 7px 18px rgba(78, 32, 39, 0.16);
+}
+
+button:active,
+.login-button:active {
+    transform: scale(0.97);
+}
+
+/* Sidebar links */
+.sidebar a {
+    transition:
+        background-color 0.25s ease,
+        padding-left 0.25s ease,
+        color 0.25s ease;
+}
+
+.sidebar a:hover {
+    padding-left: 18px;
+    background-color: rgba(255, 255, 255, 0.13);
+}
+
+/* Cards and panels */
+.panel,
+.card,
+.stat-card,
+.stat,
+.dashboard-card {
+    transition:
+        transform 0.3s ease,
+        box-shadow 0.3s ease;
+}
+
+.panel:hover,
+.card:hover,
+.stat-card:hover,
+.stat:hover,
+.dashboard-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 9px 24px rgba(78, 32, 39, 0.09);
+}
+
+/* Inputs */
+input,
+select,
+textarea {
+    transition:
+        border-color 0.25s ease,
+        box-shadow 0.25s ease;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: #722F37;
+    box-shadow: 0 0 0 3px rgba(114, 47, 55, 0.10);
+}
+
+/* Table rows */
+tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+tbody tr:hover {
+    background-color: #FAF5F2;
+}
+
+/* Medicare logo */
+.brand {
+    animation: logoAppear 0.8s ease-out both;
+}
+
+@keyframes logoAppear {
+    from {
+        opacity: 0;
+        transform: scale(0.92);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+/* ===== PREMIUM MEDICARE ANIMATIONS ===== */
+
+:root {
+  --wine: #722F37;
+  --dark-wine: #4E2027;
+  --light-wine: #F1E4E6;
+}
+
+/* Smooth page entrance */
+body {
+  animation: pageEntrance 0.7s ease-out both;
+}
+
+@keyframes pageEntrance {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Premium card hover */
+.card,
+.stat-card,
+.dashboard-card,
+.summary-card {
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
+}
+
+.card:hover,
+.stat-card:hover,
+.dashboard-card:hover,
+.summary-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 28px rgba(78, 32, 39, 0.13);
+  border-color: rgba(114, 47, 55, 0.3);
+}
+
+/* Smooth buttons */
+button,
+.btn,
+a.button {
+  transition:
+    transform 0.2s ease,
+    background-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+button:hover,
+.btn:hover,
+a.button:hover {
+  box-shadow: 0 5px 14px rgba(114, 47, 55, 0.2);
+}
+
+button:active,
+.btn:active,
+a.button:active {
+  transform: scale(0.97);
+}
+
+/* Animated input focus */
+input,
+select,
+textarea {
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--wine);
+  box-shadow: 0 0 0 3px rgba(114, 47, 55, 0.12);
+}
+
+/* Sidebar hover */
+.sidebar a,
+.sidebar .nav-link {
+  transition:
+    padding-left 0.25s ease,
+    background-color 0.25s ease,
+    color 0.25s ease;
+}
+
+.sidebar a:hover,
+.sidebar .nav-link:hover {
+  padding-left: 22px;
+  background-color: var(--light-wine);
+  color: var(--dark-wine);
+}
+
+/* Table row hover */
+tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+tbody tr:hover {
+  background-color: #FBF5F3;
+}
+
+/* Smooth modal entrance */
+.modal,
+.dialog {
+  animation: modalEntrance 0.3s ease-out both;
+}
+
+@keyframes modalEntrance {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Accessibility: respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

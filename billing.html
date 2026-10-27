@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Medicare | Billing</title>
+
+<style>
+:root {
+    --wine: #722F37;
+    --dark-wine: #4E2027;
+    --cream: #F7F3ED;
+    --white: #FFFFFF;
+    --text: #302528;
+    --muted: #82767A;
+    --border: #E8DCD6;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: Arial, sans-serif;
+    background: var(--cream);
+    color: var(--text);
+}
+
+.sidebar {
+    width: 230px;
+    min-height: 100vh;
+    background: linear-gradient(180deg, var(--wine), var(--dark-wine));
+    color: white;
+    padding: 28px 18px;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+.brand { font-size: 24px; font-weight: bold; margin-bottom: 8px; }
+.subtitle { font-size: 12px; opacity: .8; margin-bottom: 35px; }
+
+.sidebar a {
+    display: block;
+    color: white;
+    text-decoration: none;
+    padding: 12px;
+    margin: 5px 0;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.sidebar a:hover, .sidebar a.active {
+    background: rgba(255,255,255,.16);
+}
+
+main { margin-left: 230px; padding: 35px; }
+
+.heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+h1 { color: var(--wine); font-size: 30px; margin-bottom: 8px; }
+.muted { color: var(--muted); font-size: 14px; }
+
+button {
+    background: var(--wine);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 16px;
+    cursor: pointer;
+}
+
+button:hover { background: var(--dark-wine); }
+button:disabled { opacity: .6; cursor: not-allowed; }
+
+.panel {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 22px;
+}
+
+.panel h2 { font-size: 20px; margin-bottom: 18px; }
+
+input, select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin: 8px 0 14px;
+    background: white;
+    font-size: 14px;
+}
+
+label { font-size: 14px; }
+.table-wrap { overflow-x: auto; }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 650px;
+}
+
+th, td {
+    text-align: left;
+    padding: 14px 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+}
+
+th { background: var(--cream); color: var(--wine); }
+#billForm { display: none; margin-top: 24px; }
+
+.secondary, .delete-btn {
+    background: #F1E4E6;
+    color: var(--dark-wine);
+}
+
+.secondary:hover, .delete-btn:hover { background: #e8d4d8; }
+
+.total {
+    font-size: 25px;
+    font-weight: bold;
+    color: var(--wine);
+    margin-top: 15px;
+}
+
+.status { margin: 14px 0; font-size: 14px; color: var(--muted); }
+
+@media (max-width: 700px) {
+    .sidebar { width: 155px; padding: 18px 10px; }
+    main { margin-left: 155px; padding: 18px; }
+    .heading { align-items: flex-start; flex-direction: column; }
+    h1 { font-size: 24px; }
+}
+</style>
+
+<link rel="stylesheet" href="css/animations.css">
+</head>
+
+<body>
+
+<aside class="sidebar">
+    <div class="brand">✚ Medicare</div>
+    <div class="subtitle">Hospital Management System</div>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="patients.html">Patients</a>
+    <a href="doctors.html">Doctors</a>
+    <a href="appointments.html">Appointments</a>
+    <a href="medicines.html">Medicines</a>
+    <a href="billing.html" class="active">Billing</a>
+    <a href="reports.html">Reports</a>
+</aside>
+
+<main>
+    <div class="heading">
+        <div>
+            <h1>Billing Management</h1>
+            <p class="muted">Manage patient bills and payment records.</p>
+        </div>
+        <button type="button" onclick="toggleForm()">+ Create Bill</button>
+    </div>
+
+    <section class="panel">
+        <h2>Billing Records</h2>
+
+        <input id="search"
+               placeholder="Search by bill ID or patient ID..."
+               oninput="searchBills()">
+
+        <p id="status" class="status">Loading bills...</p>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Bill ID</th>
+                        <th>Patient ID</th>
+                        <th>Payment Mode</th>
+                        <th>Date</th>
+                        <th>Amount (₹)</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="billRows"></tbody>
+            </table>
+        </div>
+
+        <form id="billForm" onsubmit="addBill(event)">
+            <h2>Create New Bill</h2>
+
+            <label for="billId">Bill ID</label>
+            <input id="billId" placeholder="e.g. B303" required>
+
+            <label for="patientId">Patient ID</label>
+            <input id="patientId" type="number" min="1"
+                   placeholder="Enter existing Patient ID" required>
+
+            <label for="paymentMode">Payment Mode</label>
+            <select id="paymentMode" required>
+                <option value="">Select payment mode</option>
+                <option value="Cash">Cash</option>
+                <option value="UPI">UPI</option>
+                <option value="Card">Card</option>
+                <option value="Bank Transfer">Bank Transfer</option>
+            </select>
+
+            <label for="billDate">Bill Date</label>
+            <input id="billDate" type="date" required>
+
+            <label for="amount">Amount (₹)</label>
+            <input id="amount" type="number" min="0"
+                   step="0.01" placeholder="Enter amount" required>
+
+            <button id="saveBtn" type="submit">Save Bill</button>
+            <button type="button" class="secondary"
+                    onclick="toggleForm()">Cancel</button>
+        </form>
+
+        <p class="total" id="totalAmount">Total: ₹0.00</p>
+    </section>
+</main>
+
+<script>
+const API = "http://localhost:3000/api/bills";
+
+// Safely read the server response
+async function readResponse(response) {
+    const text = await response.text();
+
+    console.log("Server response:", text);
+
+    let result;
+
+    try {
+        result = JSON.parse(text);
+    } catch (error) {
+        if (text.trim().startsWith("<")) {
+            throw new Error(
+                "Server HTML bhej raha hai, JSON nahi. " +
+                "Check server.js API routes and restart the backend."
+            );
+        }
+
+        throw new Error("Invalid server response: " + text.slice(0, 150));
+    }
+
+    if (!response.ok) {
+        throw new Error(
+            result.message || "Request failed. Status: " + response.status
+        );
+    }
+
+    return result;
+}
+
+function toggleForm() {
+    const form = document.getElementById("billForm");
+    const opening = getComputedStyle(form).display === "none";
+
+    form.style.display = opening ? "block" : "none";
+
+    if (opening) {
+        const today = new Date();
+        const localDate = new Date(
+            today.getTime() - today.getTimezoneOffset() * 60000
+        ).toISOString().slice(0, 10);
+
+        document.getElementById("billDate").value = localDate;
+    }
+}
+
+async function loadBills() {
+    const status = document.getElementById("status");
+    status.textContent = "Loading bills...";
+
+    try {
+        const response = await fetch(API);
+        const bills = await readResponse(response);
+
+        if (!Array.isArray(bills)) {
+            throw new Error(
+                bills.message || "Unexpected server response."
+            );
+        }
+
+        const rows = document.getElementById("billRows");
+        rows.replaceChildren();
+
+        bills.forEach(bill => {
+            const row = rows.insertRow();
+
+            [
+                bill.bill_id,
+                bill.patient_id,
+                bill.payment_mode,
+                bill.date ? String(bill.date).slice(0, 10) : "",
+                Number(bill.amount || 0).toFixed(2)
+            ].forEach(value => {
+                row.insertCell().textContent = value ?? "";
+            });
+
+            const actionCell = row.insertCell();
+            const button = document.createElement("button");
+
+            button.textContent = "Delete";
+            button.className = "delete-btn";
+            button.type = "button";
+            button.onclick = () => deleteBill(bill.bill_id);
+
+            actionCell.appendChild(button);
+        });
+
+        status.textContent = bills.length
+            ? `${bills.length} bill(s) found`
+            : "No bills found. Click Create Bill to add one.";
+
+        searchBills();
+        updateTotal();
+
+    } catch (error) {
+        status.textContent = error.message;
+        console.error("Load bills error:", error);
+    }
+}
+
+async function addBill(event) {
+    event.preventDefault();
+
+    const saveBtn = document.getElementById("saveBtn");
+    saveBtn.disabled = true;
+
+    const bill = {
+        bill_id: document.getElementById("billId").value.trim(),
+        patient_id: Number(document.getElementById("patientId").value),
+        payment_mode: document.getElementById("paymentMode").value,
+        date: document.getElementById("billDate").value,
+        amount: document.getElementById("amount").value
+    };
+
+    try {
+        const response = await fetch(API, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(bill)
+        });
+
+        const result = await readResponse(response);
+
+        alert(result.message || "Bill created successfully!");
+
+        document.getElementById("billForm").reset();
+        document.getElementById("billForm").style.display = "none";
+
+        await loadBills();
+
+    } catch (error) {
+        console.error("Create bill error:", error);
+        alert("Error: " + error.message);
+    } finally {
+        saveBtn.disabled = false;
+    }
+}
+
+async function deleteBill(id) {
+    if (!confirm(`Are you sure you want to delete bill ${id}?`)) {
+        return;
+    }
+
+    try {
+        const response = await fetch(
+            `${API}/${encodeURIComponent(id)}`,
+            { method: "DELETE" }
+        );
+
+        const result = await readResponse(response);
+
+        alert(result.message || "Bill deleted successfully!");
+
+        await loadBills();
+
+    } catch (error) {
+        console.error("Delete bill error:", error);
+        alert("Error: " + error.message);
+    }
+}
+
+function searchBills() {
+    const query = document.getElementById("search")
+        .value.trim().toLowerCase();
+
+    document.querySelectorAll("#billRows tr").forEach(row => {
+        row.style.display =
+            row.textContent.toLowerCase().includes(query) ? "" : "none";
+    });
+}
+
+function updateTotal() {
+    let total = 0;
+
+    document.querySelectorAll("#billRows tr").forEach(row => {
+        total += Number(row.cells[4].textContent) || 0;
+    });
+
+    document.getElementById("totalAmount").textContent =
+        "Total: ₹" + total.toLocaleString("en-IN", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+}
+
+loadBills();
+</script>
+
+</body>
+</html>

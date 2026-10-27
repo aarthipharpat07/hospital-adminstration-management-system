@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Medicare | Appointments</title>
+
+<style>
+:root {
+    --wine: #722F37;
+    --dark-wine: #4E2027;
+    --cream: #F7F3ED;
+    --white: #FFFFFF;
+    --text: #302528;
+    --muted: #82767A;
+    --border: #E8DCD6;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: Arial, sans-serif;
+    background: var(--cream);
+    color: var(--text);
+}
+
+.sidebar {
+    width: 230px;
+    min-height: 100vh;
+    background: linear-gradient(180deg, var(--wine), var(--dark-wine));
+    color: white;
+    padding: 28px 18px;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+.brand { font-size: 24px; font-weight: bold; margin-bottom: 8px; }
+.subtitle { font-size: 12px; opacity: .8; margin-bottom: 35px; }
+
+.sidebar a {
+    display: block;
+    color: white;
+    text-decoration: none;
+    padding: 12px;
+    margin: 5px 0;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.sidebar a:hover, .sidebar a.active {
+    background: rgba(255,255,255,.16);
+}
+
+main { margin-left: 230px; padding: 35px; }
+
+.heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+h1 { color: var(--wine); font-size: 30px; margin-bottom: 8px; }
+.muted { color: var(--muted); font-size: 14px; }
+
+button {
+    background: var(--wine);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 16px;
+    cursor: pointer;
+}
+
+button:hover { background: var(--dark-wine); }
+
+.panel {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+}
+
+.panel h2 { font-size: 20px; margin-bottom: 18px; }
+
+input, select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 14px;
+    background: white;
+    font-size: 14px;
+}
+
+.table-wrap { overflow-x: auto; }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 650px;
+}
+
+th, td {
+    text-align: left;
+    padding: 14px 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+}
+
+th { background: var(--cream); color: var(--wine); }
+
+#appointmentForm { display: none; margin-top: 24px; }
+
+.secondary { background: #F1E4E6; color: var(--dark-wine); }
+
+@media (max-width: 700px) {
+    .sidebar { width: 155px; padding: 18px 10px; }
+    main { margin-left: 155px; padding: 18px; }
+    .heading { align-items: flex-start; flex-direction: column; }
+    h1 { font-size: 24px; }
+}
+</style>
+</head>
+
+<body>
+<aside class="sidebar">
+    <div class="brand">✚ Medicare</div>
+    <div class="subtitle">Hospital Management System</div>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="patients.html">Patients</a>
+    <a href="doctors.html">Doctors</a>
+    <a href="appointments.html" class="active">Appointments</a>
+    <a href="medicines.html">Medicines</a>
+    <a href="billing.html">Billing</a>
+    <a href="reports.html">Reports</a>
+</aside>
+
+<main>
+    <div class="heading">
+        <div>
+            <h1>Appointment Management</h1>
+            <p class="muted">Schedule and manage patient appointments.</p>
+        </div>
+        <button onclick="toggleForm()">+ Add Appointment</button>
+    </div>
+
+    <section class="panel">
+        <h2>Appointment Records</h2>
+
+        <input id="search" placeholder="Search appointment, patient or doctor..."
+               oninput="searchAppointments()">
+
+        <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Appointment ID</th>
+                    <th>Patient ID</th>
+                    <th>Doctor ID</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Room No.</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+           <tbody id="appointmentRows"></tbody>
+        </table>
+        </div>
+
+        <form id="appointmentForm" onsubmit="addAppointment(event)">
+            <h2>Add New Appointment</h2>
+            <input id="appId" placeholder="Appointment ID (e.g. A003)" required>
+            <input id="patientId" placeholder="Patient ID" required>
+            <input id="doctorId" placeholder="Doctor ID" required>
+            <label for="appDate">Appointment date</label>
+            <input id="appDate" type="date" required>
+            <label for="appTime">Appointment time</label>
+            <input id="appTime" type="time" required>
+            <input id="roomNo" placeholder="Room number" required>
+            <button type="submit">Save Appointment</button>
+            <button type="button" class="secondary" onclick="toggleForm()">Cancel</button>
+        </form>
+    </section>
+</main>
+
+<script>
+function toggleForm() {
+    const form = document.getElementById("appointmentForm");
+    form.style.display =
+        form.style.display === "block" ? "none" : "block";
+}
+
+// Load appointments from MySQL
+async function loadAppointments() {
+    const tbody = document.getElementById("appointmentRows");
+
+    try {
+        const response = await fetch(
+            "http://localhost:3000/api/appointments"
+        );
+
+        if (!response.ok) {
+            throw new Error("Could not load appointments");
+        }
+
+        const appointments = await response.json();
+        tbody.innerHTML = "";
+
+        appointments.forEach(app => {
+            const row = document.createElement("tr");
+
+            [
+                app.app_id,
+                app.patient_id,
+                app.doctor_id,
+                app.date,
+                app.time,
+                app.room_number ?? ""
+            ].forEach(value => {
+                const cell = document.createElement("td");
+                cell.textContent = value ?? "";
+                row.appendChild(cell);
+            });
+
+            const actionCell = document.createElement("td");
+            const deleteButton = document.createElement("button");
+            deleteButton.textContent = "Delete";
+            deleteButton.type = "button";
+            deleteButton.onclick = () => deleteAppointment(app.app_id);
+
+            actionCell.appendChild(deleteButton);
+            row.appendChild(actionCell);
+            tbody.appendChild(row);
+        });
+
+        searchAppointments();
+    } catch (error) {
+        console.error("Load appointments error:", error);
+        alert("Appointments not loaded . Backend and API check .");
+    }
+}
+
+// Save appointment to MySQL
+async function addAppointment(event) {
+    event.preventDefault();
+
+    const appointment = {
+        app_id: document.getElementById("appId").value.trim(),
+        patient_id: document.getElementById("patientId").value.trim(),
+        doctor_id: document.getElementById("doctorId").value.trim(),
+        date: document.getElementById("appDate").value,
+        time: document.getElementById("appTime").value,
+        room_number: document.getElementById("roomNo").value.trim()
+    };
+
+    try {
+        const response = await fetch(
+            "http://localhost:3000/api/appointments",
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(appointment)
+            }
+        );
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            alert(result.message || "Appointment Not saved.");
+            return;
+        }
+
+        alert("Appointment saved!");
+        document.getElementById("appointmentForm").reset();
+        document.getElementById("appointmentForm").style.display = "none";
+
+        await loadAppointments();
+    } catch (error) {
+        console.error("Save appointment error:", error);
+        alert("Backend not connected");
+    }
+}
+
+// Delete appointment from MySQL
+async function deleteAppointment(id) {
+    if (!confirm("Delete this appointment?")) return;
+
+    try {
+        const response = await fetch(
+            "http://localhost:3000/api/appointments/" +
+            encodeURIComponent(id),
+            { method: "DELETE" }
+        );
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            alert(result.message || "Appointment not deleted.");
+            return;
+        }
+
+        await loadAppointments();
+        alert("Appointment deleted.");
+    } catch (error) {
+        console.error("Delete appointment error:", error);
+        alert("Appointment not deleted check backend");
+    }
+}
+
+function searchAppointments() {
+    const query = document.getElementById("search").value.toLowerCase();
+
+    document.querySelectorAll("#appointmentRows tr").forEach(row => {
+        row.style.display =
+            row.textContent.toLowerCase().includes(query) ? "" : "none";
+    });
+}
+
+// Automatically load saved appointments when page opens
+document.addEventListener("DOMContentLoaded", loadAppointments);
+         
+</script>
+</body>
+</html>

@@ -1,0 +1,478 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Medicare | Medicines</title>
+
+<style>
+:root {
+    --wine: #722F37;
+    --dark-wine: #4E2027;
+    --cream: #F7F3ED;
+    --white: #FFFFFF;
+    --text: #302528;
+    --muted: #82767A;
+    --border: #E8DCD6;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: var(--cream);
+    color: var(--text);
+}
+
+.sidebar {
+    width: 230px;
+    min-height: 100vh;
+    background: linear-gradient(180deg, var(--wine), var(--dark-wine));
+    color: white;
+    padding: 28px 18px;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+.brand {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.subtitle {
+    font-size: 12px;
+    opacity: .8;
+    margin-bottom: 35px;
+}
+
+.sidebar a {
+    display: block;
+    color: white;
+    text-decoration: none;
+    padding: 12px;
+    margin: 5px 0;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.sidebar a:hover,
+.sidebar a.active {
+    background: rgba(255,255,255,.16);
+}
+
+main {
+    margin-left: 230px;
+    padding: 35px;
+}
+
+.heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+h1 {
+    color: var(--wine);
+    font-size: 30px;
+    margin-bottom: 8px;
+}
+
+.muted {
+    color: var(--muted);
+    font-size: 14px;
+}
+
+button {
+    background: var(--wine);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 16px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: var(--dark-wine);
+}
+
+.panel {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+}
+
+.panel h2 {
+    font-size: 20px;
+    margin-bottom: 18px;
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 14px;
+    background: white;
+    font-size: 14px;
+}
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 650px;
+}
+
+th, td {
+    text-align: left;
+    padding: 14px 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+}
+
+th {
+    background: var(--cream);
+    color: var(--wine);
+}
+
+#medicineForm {
+    display: none;
+    margin-top: 24px;
+}
+
+.secondary {
+    background: #F1E4E6;
+    color: var(--dark-wine);
+}
+
+.secondary:hover {
+    background: #E8D2D6;
+}
+
+.status {
+    margin-bottom: 15px;
+    color: var(--muted);
+    font-size: 14px;
+}
+
+@media (max-width: 700px) {
+    .sidebar {
+        width: 155px;
+        padding: 18px 10px;
+    }
+
+    main {
+        margin-left: 155px;
+        padding: 18px;
+    }
+
+    .heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    h1 {
+        font-size: 24px;
+    }
+}
+</style>
+
+<link rel="stylesheet" href="css/animations.css">
+</head>
+
+<body>
+
+<aside class="sidebar">
+    <div class="brand">✚ Medicare</div>
+    <div class="subtitle">Hospital Management System</div>
+
+    <a href="dashboard.html">Dashboard</a>
+    <a href="patients.html">Patients</a>
+    <a href="doctors.html">Doctors</a>
+    <a href="appointments.html">Appointments</a>
+    <a href="medicines.html" class="active">Medicines</a>
+    <a href="billing.html">Billing</a>
+    <a href="reports.html">Reports</a>
+</aside>
+
+<main>
+    <div class="heading">
+        <div>
+            <h1>Medicine Management</h1>
+            <p class="muted">
+                Manage medicine stock, prices and expiry dates.
+            </p>
+        </div>
+
+        <button type="button" onclick="toggleForm()">
+            + Add Medicine
+        </button>
+    </div>
+
+    <section class="panel">
+        <h2>Medicine Records</h2>
+
+        <input
+            id="search"
+            placeholder="Search by medicine ID or name..."
+            oninput="searchMedicines()"
+        >
+
+        <p class="status" id="status"></p>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Medicine ID</th>
+                        <th>Medicine Name</th>
+                        <th>Quantity</th>
+                        <th>Expiry Date</th>
+                        <th>Price (₹)</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody id="medicineRows"></tbody>
+            </table>
+        </div>
+
+        <form id="medicineForm" onsubmit="addMedicine(event)">
+            <h2>Add New Medicine</h2>
+
+            <input
+                id="medicineId"
+                placeholder="Medicine ID (e.g. M204)"
+                required
+            >
+
+            <input
+                id="medicineName"
+                placeholder="Medicine name"
+                required
+            >
+
+            <input
+                id="quantity"
+                type="number"
+                min="0"
+                step="1"
+                placeholder="Quantity"
+                required
+            >
+
+            <label for="expiry">Expiry date</label>
+            <input id="expiry" type="date" required>
+
+            <input
+                id="price"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="Price in ₹"
+                required
+            >
+
+            <button type="submit" id="saveButton">
+                Save Medicine
+            </button>
+
+            <button
+                type="button"
+                class="secondary"
+                onclick="toggleForm()"
+            >
+                Cancel
+            </button>
+        </form>
+    </section>
+</main>
+
+<script>
+const API = "http://localhost:3000/api/medicines";
+
+function toggleForm() {
+    const form = document.getElementById("medicineForm");
+
+    form.style.display =
+        form.style.display === "block" ? "none" : "block";
+}
+
+async function loadMedicines() {
+    const rows = document.getElementById("medicineRows");
+    const status = document.getElementById("status");
+
+    status.textContent = "Loading medicines...";
+    rows.innerHTML = "";
+
+    try {
+        const response = await fetch(API);
+
+        if (!response.ok) {
+            throw new Error("Could not load medicines.");
+        }
+
+        const medicines = await response.json();
+
+        rows.innerHTML = "";
+
+        if (medicines.length === 0) {
+            rows.innerHTML =
+                "<tr><td colspan='6'>No medicines found.</td></tr>";
+
+            status.textContent = "Total medicines: 0";
+            return;
+        }
+
+        medicines.forEach(medicine => {
+            const row = rows.insertRow();
+
+            const expiryDate = medicine.expiry_date
+                ? String(medicine.expiry_date).slice(0, 10)
+                : "";
+
+            [
+                medicine.m_id,
+                medicine.medicine_name,
+                medicine.quantity,
+                expiryDate,
+                medicine.price
+            ].forEach(value => {
+                row.insertCell().textContent = value ?? "";
+            });
+
+            const action = row.insertCell();
+
+            const button = document.createElement("button");
+            button.type = "button";
+            button.textContent = "Delete";
+            button.className = "secondary";
+
+            button.onclick = () => deleteMedicine(medicine.m_id);
+
+            action.appendChild(button);
+        });
+
+        status.textContent = "Total medicines: " + medicines.length;
+
+        searchMedicines();
+
+    } catch (error) {
+        console.error("Load medicines error:", error);
+
+        rows.innerHTML =
+            "<tr><td colspan='6'>Could not load medicines. Check server.js.</td></tr>";
+
+        status.textContent = "Connection failed.";
+    }
+}
+
+async function addMedicine(event) {
+    event.preventDefault();
+
+    const saveButton = document.getElementById("saveButton");
+
+    const medicine = {
+        m_id: document.getElementById("medicineId").value.trim(),
+        medicine_name: document.getElementById("medicineName").value.trim(),
+        quantity: Number(document.getElementById("quantity").value),
+        expiry_date: document.getElementById("expiry").value,
+        price: document.getElementById("price").value
+    };
+
+    saveButton.disabled = true;
+    saveButton.textContent = "Saving...";
+
+    try {
+        const response = await fetch(API, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(medicine)
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            alert(result.message || "Medicine could not be saved.");
+            return;
+        }
+
+        alert(result.message || "Medicine added successfully!");
+
+        document.getElementById("medicineForm").reset();
+        document.getElementById("medicineForm").style.display = "none";
+
+        await loadMedicines();
+
+    } catch (error) {
+        console.error("Add medicine error:", error);
+        alert("Cannot connect to server. Check that server.js is running.");
+
+    } finally {
+        saveButton.disabled = false;
+        saveButton.textContent = "Save Medicine";
+    }
+}
+
+async function deleteMedicine(id) {
+    if (!confirm("Delete medicine " + id + "?")) {
+        return;
+    }
+
+    try {
+        const response = await fetch(
+            API + "/" + encodeURIComponent(id),
+            {
+                method: "DELETE"
+            }
+        );
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            alert(result.message || "Medicine could not be deleted.");
+            return;
+        }
+
+        alert(result.message || "Medicine deleted successfully!");
+
+        await loadMedicines();
+
+    } catch (error) {
+        console.error("Delete medicine error:", error);
+        alert("Delete failed. Check the server and DELETE API route.");
+    }
+}
+
+function searchMedicines() {
+    const query = document
+        .getElementById("search")
+        .value
+        .toLowerCase();
+
+    document.querySelectorAll("#medicineRows tr").forEach(row => {
+        row.style.display =
+            row.textContent.toLowerCase().includes(query) ? "" : "none";
+    });
+}
+
+document.addEventListener("DOMContentLoaded", loadMedicines);
+</script>
+
+</body>
+</html>

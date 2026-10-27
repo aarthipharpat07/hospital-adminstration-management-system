@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medicare | Patients</title>
+
+    <style>
+        :root {
+            --wine: #722F37;
+            --dark-wine: #4E2027;
+            --cream: #F7F3ED;
+            --white: #FFFFFF;
+            --text: #302528;
+            --muted: #82767A;
+            --border: #E8DDE0;
+            --wine-light: #F1E4E6;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: var(--cream);
+            color: var(--text);
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 230px;
+            height: 100vh;
+            padding: 28px 18px;
+            background: var(--wine);
+            color: white;
+        }
+
+        .brand {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            font-size: 12px;
+            margin-bottom: 30px;
+            color: #F1E4E6;
+        }
+
+        .nav a {
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 7px 0;
+        }
+
+        .nav a:hover,
+        .nav a.active {
+            background: var(--dark-wine);
+        }
+
+        .main {
+            margin-left: 230px;
+            padding: 32px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+        }
+
+        h1, h2 {
+            color: var(--wine);
+        }
+
+        .topbar p {
+            color: var(--muted);
+            margin-top: 7px;
+        }
+
+        .button {
+            background: var(--wine);
+            color: white;
+            border: none;
+            padding: 12px 17px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .button:hover {
+            background: var(--dark-wine);
+        }
+
+        .panel {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 23px;
+            margin-bottom: 24px;
+        }
+
+        .panel h2 {
+            margin-bottom: 18px;
+            font-size: 20px;
+        }
+
+        .search {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 18px;
+            font-size: 14px;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 14px 12px;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+        }
+
+        th {
+            color: var(--muted);
+            background: #FAF7F4;
+        }
+
+        .delete-button {
+            border: none;
+            border-radius: 6px;
+            padding: 7px 10px;
+            background: var(--wine-light);
+            color: var(--wine);
+            cursor: pointer;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            margin-bottom: 7px;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: white;
+            font-size: 14px;
+        }
+
+        .form-actions {
+            margin-top: 18px;
+        }
+
+        @media (max-width: 850px) {
+            .sidebar {
+                position: static;
+                width: 100%;
+                height: auto;
+            }
+
+            .nav {
+                display: flex;
+                flex-wrap: wrap;
+            }
+
+            .main {
+                margin-left: 0;
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="css/animations.css">
+</head>
+
+<body>
+    <aside class="sidebar">
+        <div class="brand">✚ Medicare</div>
+        <div class="subtitle">Hospital Management System</div>
+
+        <nav class="nav">
+            <a href="dashboard.html">Dashboard</a>
+            <a class="active" href="patients.html">Patients</a>
+            <a href="doctors.html">Doctors</a>
+            <a href="appointments.html">Appointments</a>
+            <a href="medicines.html">Medicines</a>
+            <a href="billing.html">Billing</a>
+            <a href="reports.html">Reports</a>
+        </nav>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <div>
+                <h1>Patient Management</h1>
+                <p>Add, search and manage patient records.</p>
+            </div>
+
+            <button class="button" onclick="showForm()">
+                + Add Patient
+            </button>
+        </header>
+
+        <section class="panel" id="patientFormPanel" hidden>
+            <h2>Add New Patient</h2>
+
+            <form id="patientForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="patientId">Patient ID</label>
+                        <input id="patientId" required placeholder="e.g. 203">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="patientName">Full Name</label>
+                        <input id="patientName" required placeholder="Enter patient name">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="patientAge">Age</label>
+                        <input id="patientAge" type="number" min="0" max="120" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="patientPhone">Phone Number</label>
+                        <input id="patientPhone" type="tel" required placeholder="Enter phone number">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="patientGender">Gender</label>
+                        <select id="patientGender" required>
+                            <option value="">Select gender</option>
+                            <option>Male</option>
+                            <option>Female</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button class="button" type="submit">Save Patient</button>
+                    <button class="button" type="button"
+                        onclick="hideForm()">Cancel</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="panel">
+            <h2>Patient Records</h2>
+
+            <input class="search" id="searchInput"
+                placeholder="Search by patient ID, name or phone number...">
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Patient ID</th>
+                            <th>Name</th>
+                            <th>Age</th>
+                            <th>Phone</th>
+                            <th>Gender</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="patientTable">
+                      
+                    
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const formPanel = document.getElementById("patientFormPanel");
+        const patientForm = document.getElementById("patientForm");
+        const patientTable = document.getElementById("patientTable");
+        const searchInput = document.getElementById("searchInput");
+        async function loadPatientsFromDatabase() {
+    try {
+        const response = await fetch("http://localhost:3000/api/patients");
+
+        if (!response.ok) {
+            throw new Error("Failed to fetch patients");
+        }
+
+        const patients = await response.json();
+
+        patientTable.innerHTML = "";
+
+        patients.forEach(patient => {
+            const row = patientTable.insertRow();
+
+            [
+                patient.patient_id,
+                patient.name,
+                patient.age,
+                patient.phone_number || "Not provided",
+                patient.gender
+            ].forEach(value => {
+                const cell = row.insertCell();
+                cell.textContent = value ?? "";
+            });
+
+            const actionCell = row.insertCell();
+            const deleteButton = document.createElement("button");
+
+            deleteButton.className = "delete-button";
+            deleteButton.textContent = "Delete";
+            deleteButton.onclick = function () {
+                deletePatient(deleteButton);
+            };
+
+            actionCell.appendChild(deleteButton);
+        });
+
+    } catch (error) {
+        console.error("Failed to load patients:", error);
+        alert("Patients could not be loaded. Check whether the backend is running.");
+    }
+}
+
+loadPatientsFromDatabase();
+
+        function showForm() {
+            formPanel.hidden = false;
+            document.getElementById("patientId").focus();
+        }
+
+        function hideForm() {
+            formPanel.hidden = true;
+            patientForm.reset();
+        }
+
+        patientForm.addEventListener("submit", async function (event) {
+    event.preventDefault();
+
+    const id = document.getElementById("patientId").value.trim();
+    const name = document.getElementById("patientName").value.trim();
+    const age = Number(document.getElementById("patientAge").value);
+    const phone = document.getElementById("patientPhone").value.trim();
+    const gender = document.getElementById("patientGender").value;
+
+    const existingIds = Array.from(
+        patientTable.querySelectorAll("tr td:first-child")
+    ).map(cell => cell.textContent.trim());
+
+    if (existingIds.includes(id)) {
+        alert("This Patient ID already exists.");
+        return;
+    }
+
+    try {
+        const response = await fetch("http://localhost:3000/api/patients", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                patient_id: id,
+                name: name,
+                age: age,
+                ph_no: phone,
+                gender: gender
+            })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+            throw new Error(result.message || "Could not save patient.");
+        }
+
+        alert("Patient saved successfully!");
+        patientForm.reset();
+        formPanel.hidden = true;
+
+        await loadPatientsFromDatabase();
+        searchInput.dispatchEvent(new Event("input"));
+
+    } catch (error) {
+        console.error("Add patient error:", error);
+        alert(error.message || "Could not connect to the backend.");
+    }
+});
+
+        async function deletePatient(button) {
+    const row = button.closest("tr");
+    const patientId = row.cells[0].textContent.trim();
+
+    if (!confirm("Are you sure you want to delete this patient?")) {
+        return;
+    }
+
+    try {
+        const response = await fetch(
+            `http://localhost:3000/api/patients/${encodeURIComponent(patientId)}`,
+            {
+                method: "DELETE"
+            }
+        );
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+            throw new Error(result.message || "Could not delete patient.");
+        }
+
+        alert("Patient deleted successfully!");
+
+        await loadPatientsFromDatabase();
+        searchInput.dispatchEvent(new Event("input"));
+
+    } catch (error) {
+        console.error("Delete patient error:", error);
+        alert(error.message || "Could not connect to the backend.");
+    }
+}
+
+        searchInput.addEventListener("input", function () {
+            const query = this.value.toLowerCase().trim();
+
+            patientTable.querySelectorAll("tr").forEach(row => {
+                row.hidden = !row.textContent.toLowerCase().includes(query);
+            });
+        });
+    </script>
+</body>
+</html>
